@@ -1,15 +1,10 @@
-import { products } from "./data/products.js";
+import dotenv from 'dotenv';
+dotenv.config(); // Має бути на самому початку
 
-app.post("/api/search", (req, res) => {
-  const { query } = req.body;
+import app from "./src/app.js";
 
-  if (!query) {
-    return res.json(products.slice(0, 20));
-  }
+const PORT = 5000;
 
-  const filtered = products.filter((product) =>
-    product.name.toLowerCase().includes(query.toLowerCase())
-  );
-
-  res.json(filtered);
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
