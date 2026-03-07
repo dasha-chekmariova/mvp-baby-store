@@ -28,7 +28,7 @@ items.push({
   color: color,
   price: Math.floor(Math.random() * (15000 - 200) + 200),
   description: "Чудовий товар у категорії " + category + ". Бренд: " + brand + ". Колір: " + color + ".",
-  image: "[https://picsum.photos/seed/](https://picsum.photos/seed/)" + (i + 1000) + "/400/400"
+  image: "https://placehold.co/400x400/fce7f3/db2777?text=Baby+Store" + (i + 1000) + "/400/400"
 });
 }
 return items;

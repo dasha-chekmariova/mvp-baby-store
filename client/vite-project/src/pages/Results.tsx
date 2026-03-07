@@ -1,3 +1,4 @@
+import { useCart } from "../context/CartContext";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -5,6 +6,7 @@ const Results = () => {
   const location = useLocation();
   const query = location.state?.query;
   const [products, setProducts] = useState<any[]>([]);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     if (!query) return;
@@ -51,7 +53,7 @@ const Results = () => {
                 <p className="text-gray-500 text-xs mb-4 line-clamp-2">{product.description}</p>
                 <div className="flex justify-between items-center mt-auto">
                   <span className="text-xl font-black text-pink-600">{product.price} грн</span>
-                  <button className="bg-pink-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-pink-600 transition-colors">
+                  <button onClick={() => addToCart(product)} className="bg-pink-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-pink-600 transition-colors">
                     Купити
                   </button>
                 </div>
