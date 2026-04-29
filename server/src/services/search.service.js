@@ -1,13 +1,9 @@
-import { analyzeQuery } from "./ai.service.js";
+import { extractFiltersFromQuery } from "./ai.service.js";
 import { getRecommendations } from "./recommendation.service.js";
 
 export const handleSearch = async (query) => {
-  const filters = await analyzeQuery(query);
+  const filters = await extractFiltersFromQuery(query);
+  const results = await getRecommendations(filters);
 
-  const recommendations = await getRecommendations(filters);
-
-  return {
-    filters,
-    results: recommendations,
-  };
+  return { filters, results };
 };

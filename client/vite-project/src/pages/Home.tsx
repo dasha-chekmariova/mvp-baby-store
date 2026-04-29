@@ -1,104 +1,229 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import SearchBox from "../components/SearchBox";
+import ProductCard from "../components/ProductCard";
+import { useCart } from "../context/CartContext";
+import type { Product } from "../types/product";
 
-// Компонент з літаючими іконками
-const BackgroundPattern = () => {
-  return (
-    <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
-      <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="babyPattern" x="0" y="0" width="150" height="150" patternUnits="userSpaceOnUse">
-            {/* Ведмедик */}
-            <g transform="translate(20, 20) scale(1.2)" stroke="currentColor" fill="none" strokeWidth="1.5">
-               <circle cx="12" cy="12" r="8"/>
-               <circle cx="6" cy="6" r="3"/>
-               <circle cx="18" cy="6" r="3"/>
-               <circle cx="9" cy="11" r="1" fill="currentColor"/>
-               <circle cx="15" cy="11" r="1" fill="currentColor"/>
-               <path d="M10 15q2 2 4 0"/>
-            </g>
-            {/* Пустушка */}
-            <g transform="translate(100, 40) scale(1.2)" stroke="currentColor" fill="none" strokeWidth="1.5">
-                <circle cx="12" cy="16" r="4" />
-                <path d="M8 12h8v2a4 4 0 0 1-8 0z" fill="currentColor" opacity="0.5"/>
-                <path d="M12 4v8" />
-            </g>
-            {/* Коляска */}
-            <g transform="translate(40, 90) scale(1.2)" stroke="currentColor" fill="none" strokeWidth="1.5">
-                <path d="M16 16h-8v-6a4 4 0 0 1 8 0z" fill="currentColor" opacity="0.3"/>
-                <circle cx="9" cy="18" r="2"/>
-                <circle cx="15" cy="18" r="2"/>
-                <path d="M16 10h4v-2"/>
-                <path d="M8 10h8"/>
-            </g>
-            {/* Пляшечка */}
-            <g transform="translate(110, 100) scale(1.2)" stroke="currentColor" fill="none" strokeWidth="1.5">
-                <rect x="8" y="10" width="8" height="10" rx="2" />
-                <path d="M10 10V6c0-1.1.9-2 2-2s2 .9 2 2v4" fill="currentColor" opacity="0.3"/>
-                <path d="M9 10h6"/>
-            </g>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#babyPattern)" className="text-pink-400"/>
-      </svg>
-    </div>
-  );
-};
+const categoryCards = [
+  { key: "strollers", label: "Коляски", emoji: "🍼" },
+  { key: "toys", label: "Іграшки", emoji: "🧸" },
+  { key: "clothing", label: "Одяг", emoji: "👶" },
+  { key: "cribs", label: "Ліжечка", emoji: "🛏️" },
+  { key: "feeding", label: "Годування", emoji: "🥣" },
+  { key: "books", label: "Книги", emoji: "📚" },
+  { key: "hygiene", label: "Гігієна", emoji: "🧴" },
+  { key: "playmats", label: "Килимки", emoji: "🎨" },
+];
+
+interface HomeData {
+  popular: Product[];
+  onSale: Product[];
+  newArrivals: Product[];
+}
+
+const SectionTitle = ({
+  title,
+  subtitle,
+}: {
+  title: string;
+  subtitle?: string;
+}) => (
+  <div className="mb-6">
+    <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+    {subtitle && <p className="text-gray-400 text-sm mt-1">{subtitle}</p>}
+  </div>
+);
 
 const Home = () => {
-  const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const [data, setData] = useState<HomeData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  useEffect(() => {
+    fetch("http://localhost:5001/api/recommendations/home")
+      .then((res) => res.json())
+      .then(setData)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
+  const handleSearch = (query: string) => {
     navigate("/results", { state: { query } });
   };
 
+  const handleCategoryClick = (category: string) => {
+    navigate("/results", { state: { query: category } });
+  };
+
   return (
-    <div className="h-screen bg-gradient-to-br from-pink-50 to-rose-100 flex items-center justify-center relative overflow-hidden">
-      
-      {/* Літаючі іконки на фоні */}
-      <BackgroundPattern />
-
-      {/* Анімація для фону */}
-      <style>
-        {`
-          @keyframes floatItems {
-            0% { transform: translateY(0px) rotate(0deg); }
-            33% { transform: translateY(-15px) rotate(3deg); }
-            66% { transform: translateY(10px) rotate(-2deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
-          }
-          .text-pink-400 rect {
-            animation: floatItems 12s ease-in-out infinite;
-          }
-        `}
-      </style>
-
-      {/* Головна картка (додано backdrop-blur для ефекту скла) */}
-      <div className="bg-white/90 backdrop-blur-md shadow-2xl rounded-3xl p-10 w-full max-w-xl text-center relative z-10 border border-white">
-        <h1 className="text-4xl font-light mb-6 text-gray-800">
-          Що б ви хотіли придбати сьогодні?
-        </h1>
-
-        <form onSubmit={handleSubmit}>
-          <textarea
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Наприклад: коврик 120х120 нейтральних відтінків"
-            className="w-full p-4 border border-pink-100 rounded-xl mb-4 resize-none h-28 focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white/80 text-gray-700"
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+              backgroundSize: "40px 40px",
+            }}
           />
+        </div>
 
-          <button
-            type="submit"
-            className="w-full bg-pink-500 text-white py-4 rounded-xl hover:bg-pink-600 transition text-lg shadow-lg shadow-pink-200"
-          >
-            Знайти товар
-          </button>
-        </form>
-      </div>
+        <div className="relative max-w-3xl mx-auto px-6 pt-16 pb-20 text-center">
+          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+            <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+            ШІ-пошук товарів
+          </div>
+
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
+            Знайдемо ідеальний товар
+            <br />
+            <span className="text-pink-200">для вашого малюка</span>
+          </h1>
+
+          <p className="text-pink-100 text-lg mb-8 max-w-lg mx-auto">
+            Опишіть що шукаєте природною мовою — штучний інтелект підбере
+            найкращі варіанти
+          </p>
+
+          <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl shadow-pink-900/20 max-w-xl mx-auto">
+            <SearchBox onSearch={handleSearch} />
+          </div>
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section className="max-w-7xl mx-auto px-6 -mt-8 relative z-10">
+        <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
+          {categoryCards.map((cat) => (
+            <button
+              key={cat.key}
+              onClick={() => handleCategoryClick(cat.label)}
+              className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 flex flex-col items-center gap-2 group"
+            >
+              <span className="text-2xl group-hover:scale-110 transition-transform">
+                {cat.emoji}
+              </span>
+              <span className="text-xs font-medium text-gray-600 group-hover:text-pink-600 transition-colors">
+                {cat.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <div className="w-10 h-10 border-4 border-pink-200 border-t-pink-500 rounded-full animate-spin" />
+        </div>
+      ) : (
+        data && (
+          <div className="max-w-7xl mx-auto px-6 py-12 space-y-16">
+            {/* Sale Section */}
+            {data.onSale.length > 0 && (
+              <section>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="bg-red-500 text-white px-4 py-1.5 rounded-xl text-sm font-bold animate-pulse">
+                    SALE
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-800">
+                      Акційні пропозиції
+                    </h2>
+                    <p className="text-gray-400 text-sm">
+                      Встигніть придбати за зниженою ціною
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                  {data.onSale.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onAddToCart={addToCart}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* New Arrivals */}
+            {data.newArrivals.length > 0 && (
+              <section>
+                <SectionTitle
+                  title="Новинки"
+                  subtitle="Щойно надійшли у наш магазин"
+                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                  {data.newArrivals.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onAddToCart={addToCart}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Popular */}
+            {data.popular.length > 0 && (
+              <section>
+                <SectionTitle
+                  title="Популярні товари"
+                  subtitle="Найвищі оцінки від наших покупців"
+                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                  {data.popular.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onAddToCart={addToCart}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Promo Banner */}
+            <section className="bg-gradient-to-r from-violet-500 to-pink-500 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+              <div className="relative">
+                <h3 className="text-2xl md:text-3xl font-bold mb-3">
+                  Безкоштовна доставка від 2000 грн
+                </h3>
+                <p className="text-white/80 text-lg mb-6 max-w-lg">
+                  Замовляйте онлайн — доставимо Новою Поштою по всій Україні.
+                  Повернення протягом 14 днів.
+                </p>
+                <button
+                  onClick={() => handleSearch("популярні іграшки")}
+                  className="bg-white text-pink-600 px-6 py-3 rounded-xl font-bold hover:bg-pink-50 transition-colors shadow-lg"
+                >
+                  Почати покупки
+                </button>
+              </div>
+            </section>
+          </div>
+        )
+      )}
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-400 mt-12">
+        <div className="max-w-7xl mx-auto px-6 py-10">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <span className="text-xl font-black text-white tracking-tight">
+              Baby<span className="text-pink-500">Store</span>
+            </span>
+            <p className="text-sm">
+              &copy; 2025 BabyStore. Дипломний проект. Усі права захищені.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
