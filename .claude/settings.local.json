@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(./node_modules/.bin/tsc:*)",
+      "Bash(./node_modules/.bin/vite build:*)",
+      "Bash(node -e \"import\\('./src/app.js'\\).then\\(\\(\\) => console.log\\('OK'\\)\\).catch\\(e => console.error\\(e.message\\)\\)\")",
+      "Bash(npm run:*)",
+      "Bash(open http://localhost:5173)",
+      "Bash(curl:*)",
+      "Bash(lsof:*)",
+      "Bash(kill 15941)",
+      "Bash(node:*)",
+      "Bash(xargs kill:*)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'Popular: {len\\(d[\\\\\"popular\\\\\"]\\)}, OnSale: {len\\(d[\\\\\"onSale\\\\\"]\\)}, New: {len\\(d[\\\\\"newArrivals\\\\\"]\\)}'\\)\")",
+      "Bash(git rm:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}
