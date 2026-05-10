@@ -24,7 +24,7 @@ const Results = () => {
     setSearchDone(false);
     setSuggestions([]);
 
-    fetch("http://localhost:5001/api/search", {
+    fetch("/api/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query }),
@@ -39,7 +39,7 @@ const Results = () => {
         setSearchDone(true);
 
         if (results.length === 0) {
-          fetch("http://localhost:5001/api/recommendations/fallback")
+          fetch("/api/recommendations/fallback")
             .then((res) => res.json())
             .then((data) => setSuggestions(data.suggestions || []))
             .catch(console.error);

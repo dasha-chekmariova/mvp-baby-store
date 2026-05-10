@@ -42,7 +42,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/recommendations/home")
+    fetch("/api/recommendations/home")
       .then((res) => res.json())
       .then(setData)
       .catch(console.error)
